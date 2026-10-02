@@ -1,6 +1,8 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestGetHeadingFromHTMLBasic(t *testing.T) {
 	inputBody := "<html><body><h1>Test Title</h1></body></html>"
