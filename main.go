@@ -20,13 +20,11 @@ func main() {
 
 	if len(args) == 1{
 		fmt.Printf("starting crawl of: %s\n", args[0])
-		fmt.Println(args[0])
-		html, err := getHTML(args[0])
-		if err != nil {
-			fmt.Printf("error occurred while fetching HTML: %v\n", err)
-			os.Exit(1)
+		pages := make(map[string]int)
+		crawlPage(args[0], args[0], pages)
+		for normalizedURL, count := range pages{
+			fmt.Printf("found page: %s, count: %d\n", normalizedURL, count)
 		}
-		fmt.Println(html)
 	}
 
 

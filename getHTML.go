@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"io"
+	"mime"
+	"net/http"
 )
 
 func getHTML(rawURL string) (string, error) {
@@ -21,20 +22,20 @@ func getHTML(rawURL string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode >= 400{
-		return "", fmt.Errorf("HTTP request failed with status code: %d", resp.StatusCode)	
+	if resp.StatusCode >= 400 {
+		return "", fmt.Errorf("HTTP request failed with status code: %d", resp.StatusCode)
 	}
 
-	if resp.Header.Get("Content-Type") != "text/html" {
+	contentType, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+	if err != nil || contentType != "text/html" {
 		return "", fmt.Errorf("Content-Type is not text/html: %s", resp.Header.Get("Content-Type"))
 	}
-	
+
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
 
 	return string(bodyBytes), nil
-
 
 }
