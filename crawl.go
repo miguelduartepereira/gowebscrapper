@@ -5,16 +5,16 @@ import (
 	"net/url"
 )
 
-func crawlPage(rawBaseURL, rawCurrentURL string, pages map[string]int) {
+func (cfg *config) crawlPage(rawCurrentURL string){
 	currentURL, err := url.Parse(rawCurrentURL)
 	if err != nil {
 		fmt.Printf("Error - crawlPage: couldn't parse URL '%s': %v\n", rawCurrentURL, err)
 		return
 	}
 
-	parsedURL, err := url.Parse(rawBaseURL)
+	parsedURL, err := url.Parse(cfg.baseURL.String())
 	if err != nil {
-		fmt.Printf("Error - crawlPage: couldn't parse URL '%s': %v\n", rawBaseURL, err)
+		fmt.Printf("Error - crawlPage: couldn't parse URL '%s': %v\n", cfg.baseURL.String(), err)
 		return
 	}
 
@@ -30,8 +30,8 @@ func crawlPage(rawBaseURL, rawCurrentURL string, pages map[string]int) {
 	}
 
 	// increment if visited
-	if _, visited := pages[normalizedURL]; visited {
-		pages[normalizedURL]++
+	if _, visited := cfg.pages[normalizedURL]; visited {
+		cfg.pages[normalizedURL]++
 		return
 	}
 
