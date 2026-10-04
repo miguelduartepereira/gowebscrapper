@@ -3,29 +3,46 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 )
 
-
 func main() {
-	args := os.Args[1:]
-	if len(args) < 1{
+	if len(os.Args) < 2 {
 		fmt.Println("no website provided")
 		os.Exit(1)
 	}
-
-	if len(args) > 1{
+	if len(os.Args) > 4 {
 		fmt.Println("too many arguments provided")
 		os.Exit(1)
 	}
-
-	if len(args) == 1{
-		fmt.Printf("starting crawl of: %s\n", args[0])
-		pages := make(map[string]int)
-		crawlPage(args[0], args[0], pages)
-		for normalizedURL, count := range pages{
-			fmt.Printf("found page: %s, count: %d\n", normalizedURL, count)
-		}
+	rawBaseURL := os.Args[1]
+	maxConcurrency, err := strconv.Atoi(os.Args[2])
+	if err != nil {
+		fmt.Printf("invalid max concurrency: %v\n", err)
+		return
 	}
 
+	maxPages, err := strconv.Atoi(os.Args[3])
+	if err != nil {
+		fmt.Printf("invalid max pages: %v\n", err)
+		return
+	}
 
+	cfg, err := configure(rawBaseURL, maxConcurrency, maxPages)
+	if err != nil {
+		fmt.Printf("Error - configure: %v", err)
+		return
+	}
+
+	fmt.Printf("starting crawl of: %s...\n", rawBaseURL)
+
+	cfg.wg.Add(1)
+	go cfg.crawlPage(rawBaseURL)
+	cfg.wg.Wait()
+
+	writeJSONReport(cfg.pages, "report.json")
+
+	for normalizedURL := range cfg.pages {
+		fmt.Printf("found: %s\n", normalizedURL)
+	}
 }
